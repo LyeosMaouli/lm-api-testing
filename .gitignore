@@ -11,6 +11,11 @@ _qt.js
 *_diff.js
 .env
 
+# Python Virtual Environment #
+##############################
+backend/venv/
+venv/
+
 
 # Compiled source #
 ###################

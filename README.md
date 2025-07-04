@@ -50,11 +50,10 @@ A single-user web application that integrates with Brevo's API to manage contact
 
 ### Step 2: Backend Setup
 
-1. **Create project directory and navigate to it:**
+1. **Navigate to your existing repository:**
 
    ```bash
-   mkdir brevo-api-app
-   cd brevo-api-app
+   cd lm-api-testing
    ```
 
 2. **Create backend directory:**
@@ -111,10 +110,10 @@ A single-user web application that integrates with Brevo's API to manage contact
 
 ### Step 3: Frontend Setup
 
-1. **In a new terminal, navigate to project root:**
+1. **In a new terminal, navigate to repository root:**
 
    ```bash
-   cd ../  # Go back to project root
+   cd lm-api-testing
    ```
 
 2. **Create frontend directory:**
@@ -155,7 +154,11 @@ A single-user web application that integrates with Brevo's API to manage contact
 ## 📁 Final Project Structure
 
 ```
-brevo-api-app/
+lm-api-testing/
+├── .gitignore
+├── .vscode/
+├── LICENSE
+├── README (this file)
 ├── backend/
 │   ├── venv/
 │   ├── app.py
@@ -495,7 +498,11 @@ def detailed_health_check():
 **Backend Commands:**
 
 ```bash
-# Activate virtual environment
+# Navigate to repository
+cd lm-api-testing
+
+# Activate virtual environment (from backend directory)
+cd backend
 venv\Scripts\activate
 
 # Install dependencies
@@ -511,7 +518,11 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 **Frontend Commands:**
 
 ```bash
-# Install dependencies
+# Navigate to repository
+cd lm-api-testing
+
+# Install dependencies (from frontend directory)
+cd frontend
 npm install
 
 # Start development server
