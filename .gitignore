@@ -15,7 +15,19 @@ _qt.js
 ##############################
 backend/venv/
 venv/
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
 
+# Environment variables #
+#########################
+backend/.env
+.env
+
+# Python compiled files #
+#########################
+*.egg-info/
 
 # Compiled source #
 ###################
