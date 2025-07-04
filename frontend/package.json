@@ -4,22 +4,19 @@
   "description": "React frontend for Brevo API integration",
   "private": true,
   "dependencies": {
+    "@mui/material": "^5.15.15",
+    "@mui/icons-material": "^5.15.15",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@mui/icons-material": "^5.15.15",
-    "@mui/material": "^5.15.15",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "cleanup": "npm prune && npm audit fix && npm dedupe",
-    "update-check": "ncu && npm outdated",
-    "update-all": "ncu -u && npm install"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -39,31 +36,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://127.0.0.1:5000",
-  "overrides": {
-    "inflight": "npm:inflight-lru@^1.0.0",
-    "@babel/plugin-proposal-private-methods": "npm:@babel/plugin-transform-private-methods@^7.24.0",
-    "@babel/plugin-proposal-class-properties": "npm:@babel/plugin-transform-class-properties@^7.24.0",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "npm:@babel/plugin-transform-nullish-coalescing-operator@^7.24.0",
-    "@babel/plugin-proposal-numeric-separator": "npm:@babel/plugin-transform-numeric-separator@^7.24.0",
-    "@babel/plugin-proposal-private-property-in-object": "npm:@babel/plugin-transform-private-property-in-object@^7.24.0",
-    "@babel/plugin-proposal-optional-chaining": "npm:@babel/plugin-transform-optional-chaining@^7.24.0",
-    "@humanwhocodes/config-array": "npm:@eslint/config-array@^0.14.0",
-    "@humanwhocodes/object-schema": "npm:@eslint/object-schema@^2.1.0",
-    "stable": "^0.1.8",
-    "rimraf": "^5.0.0",
-    "glob": "^10.0.0",
-    "rollup-plugin-terser": "npm:@rollup/plugin-terser@^0.4.0",
-    "abab": false,
-    "q": "^1.5.1",
-    "domexception": false,
-    "sourcemap-codec": "npm:@jridgewell/sourcemap-codec@^1.4.0",
-    "w3c-hr-time": false,
-    "workbox-cacheable-response": "^7.0.0",
-    "workbox-google-analytics": "^7.0.0",
-    "svgo": "^3.0.0",
-    "eslint": "^9.0.0",
-    "postcss": "^8.4.31",
-    "webpack-dev-server": "^4.15.1"
-  }
+  "proxy": "http://127.0.0.1:5000"
 }

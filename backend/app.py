@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 # Brevo API configuration
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
+BREVO_SENDER_EMAIL = os.getenv('BREVO_SENDER_EMAIL')
+BREVO_SENDER_NAME = os.getenv('BREVO_SENDER_NAME', 'API Integration')
 BREVO_BASE_URL = 'https://api.brevo.com/v3'
 
 def get_brevo_headers():
@@ -64,6 +66,101 @@ def get_account_info():
             return jsonify({
                 'status': 'error',
                 'message': f'Brevo API error: {response.status_code}',
+                'details': response.text
+            }), response.status_code
+            
+    except ValueError as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to connect to Brevo API',
+            'details': str(e)
+        }), 500
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': 'An unexpected error occurred',
+            'details': str(e)
+        }), 500
+
+@app.route('/api/send-custom-event', methods=['POST'])
+def send_custom_event():
+    """Send a custom event to Brevo"""
+    try:
+        headers = get_brevo_headers()
+        
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request body is required'
+            }), 400
+        
+        # Validate required fields
+        event_name = data.get('event_name')
+        email_id = data.get('email_id')
+        
+        if not event_name:
+            return jsonify({
+                'status': 'error',
+                'message': 'Event name is required'
+            }), 400
+            
+        if not email_id:
+            return jsonify({
+                'status': 'error',
+                'message': 'Email ID is required'
+            }), 400
+        
+        # Prepare event payload
+        event_payload = {
+            'event_name': event_name,
+            'event_date': data.get('event_date'),  # ISO format or current time if not provided
+            'identifiers': {
+                'email_id': email_id
+            }
+        }
+        
+        # Add optional contact properties
+        contact_properties = data.get('contact_properties', {})
+        if contact_properties:
+            event_payload['contact_properties'] = contact_properties
+        
+        # Add optional event properties
+        event_properties = data.get('event_properties', {})
+        if event_properties:
+            event_payload['event_properties'] = event_properties
+        
+        # Add other identifiers if provided
+        identifiers = event_payload['identifiers']
+        if data.get('phone_id'):
+            identifiers['phone_id'] = data.get('phone_id')
+        if data.get('ext_id'):
+            identifiers['ext_id'] = data.get('ext_id')
+        
+        response = requests.post(f'{BREVO_BASE_URL}/events', headers=headers, json=event_payload)
+        
+        if response.status_code == 204:  # Brevo returns 204 for successful event creation
+            return jsonify({
+                'status': 'success',
+                'message': 'Custom event sent successfully',
+                'data': {
+                    'event_name': event_name,
+                    'email_id': email_id
+                }
+            })
+        else:
+            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to send event: {response.status_code}',
                 'details': response.text
             }), response.status_code
             
@@ -153,6 +250,13 @@ def send_test_email():
     try:
         headers = get_brevo_headers()
         
+        # Check if sender email is configured
+        if not BREVO_SENDER_EMAIL:
+            return jsonify({
+                'status': 'error',
+                'message': 'Sender email not configured. Please set BREVO_SENDER_EMAIL in environment variables.'
+            }), 400
+        
         # Get request data
         data = request.get_json()
         if not data:
@@ -169,11 +273,11 @@ def send_test_email():
                 'message': 'Recipient email (to) is required'
             }), 400
         
-        # Prepare email payload
+        # Prepare email payload with mandatory sender from env
         email_payload = {
             'sender': {
-                'name': data.get('senderName', 'Test Sender'),
-                'email': data.get('senderEmail', to_email)  # Use recipient as sender if not provided
+                'name': BREVO_SENDER_NAME,
+                'email': BREVO_SENDER_EMAIL
             },
             'to': [{'email': to_email}],
             'subject': data.get('subject', 'Test Email from Brevo API'),
@@ -189,6 +293,7 @@ def send_test_email():
                 'data': response.json()
             })
         else:
+            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
             return jsonify({
                 'status': 'error',
                 'message': f'Failed to send email: {response.status_code}',
@@ -236,6 +341,13 @@ if __name__ == '__main__':
         print("⚠️  Warning: BREVO_API_KEY not configured. Please check your .env file.")
     else:
         logger.info("Brevo API key configured successfully")
+    
+    # Check if sender email is configured
+    if not BREVO_SENDER_EMAIL:
+        logger.warning("BREVO_SENDER_EMAIL not found in environment variables!")
+        print("⚠️  Warning: BREVO_SENDER_EMAIL not configured. Please check your .env file.")
+    else:
+        logger.info(f"Brevo sender email configured: {BREVO_SENDER_EMAIL}")
     
     # Run the app
     app.run(debug=True, host='127.0.0.1', port=5000)

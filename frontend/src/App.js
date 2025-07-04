@@ -24,7 +24,8 @@ import {
   Email,
   Contacts,
   Send,
-  Refresh
+  Refresh,
+  Event
 } from "@mui/icons-material"
 
 const API_BASE_URL = "http://127.0.0.1:5000"
@@ -34,12 +35,17 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [emailDialog, setEmailDialog] = useState(false)
+  const [eventDialog, setEventDialog] = useState(false)
   const [emailForm, setEmailForm] = useState({
     to: "",
     subject: "Test Email from Brevo API",
-    content: "<p>This is a test email sent via Brevo API integration.</p>",
-    senderName: "Test Sender",
-    senderEmail: ""
+    content: "<p>This is a test email sent via Brevo API integration.</p>"
+  })
+  const [eventForm, setEventForm] = useState({
+    event_name: "video_played",
+    email_id: "",
+    contact_properties: "",
+    event_properties: ""
   })
   const [formatJson, setFormatJson] = useState(true)
 
@@ -98,6 +104,35 @@ function App() {
     setEmailDialog(false)
   }
 
+  const handleEventSubmit = () => {
+    if (!eventForm.event_name || !eventForm.email_id) {
+      setError("Event name and email ID are required")
+      return
+    }
+
+    // Parse JSON strings for properties
+    let eventData = {
+      event_name: eventForm.event_name,
+      email_id: eventForm.email_id,
+      event_date: new Date().toISOString()
+    }
+
+    try {
+      if (eventForm.contact_properties.trim()) {
+        eventData.contact_properties = JSON.parse(eventForm.contact_properties)
+      }
+      if (eventForm.event_properties.trim()) {
+        eventData.event_properties = JSON.parse(eventForm.event_properties)
+      }
+    } catch (e) {
+      setError("Invalid JSON format in properties fields")
+      return
+    }
+
+    handleApiCall("/api/send-custom-event", "POST", eventData)
+    setEventDialog(false)
+  }
+
   const apiButtons = [
     {
       label: "Get Account Info",
@@ -116,6 +151,12 @@ function App() {
       icon: <Email />,
       onClick: () => setEmailDialog(true),
       color: "success"
+    },
+    {
+      label: "Send Custom Event",
+      icon: <Event />,
+      onClick: () => setEventDialog(true),
+      color: "warning"
     },
     {
       label: "Health Check",
@@ -246,24 +287,7 @@ function App() {
               }
               required
               fullWidth
-            />
-            <TextField
-              label="Sender Name"
-              value={emailForm.senderName}
-              onChange={(e) =>
-                setEmailForm({ ...emailForm, senderName: e.target.value })
-              }
-              fullWidth
-            />
-            <TextField
-              label="Sender Email (Optional)"
-              type="email"
-              value={emailForm.senderEmail}
-              onChange={(e) =>
-                setEmailForm({ ...emailForm, senderEmail: e.target.value })
-              }
-              fullWidth
-              helperText="Leave empty to use recipient email as sender"
+              helperText="Email will be sent from the configured sender in backend"
             />
             <TextField
               label="Subject"
@@ -293,6 +317,83 @@ function App() {
             startIcon={<Send />}
           >
             Send Email
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Custom Event Dialog */}
+      <Dialog
+        open={eventDialog}
+        onClose={() => setEventDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Event />
+            Send Custom Event
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+            <TextField
+              label="Event Name"
+              value={eventForm.event_name}
+              onChange={(e) =>
+                setEventForm({ ...eventForm, event_name: e.target.value })
+              }
+              required
+              fullWidth
+              helperText="e.g., video_played, product_viewed, form_submitted"
+            />
+            <TextField
+              label="Email ID"
+              type="email"
+              value={eventForm.email_id}
+              onChange={(e) =>
+                setEventForm({ ...eventForm, email_id: e.target.value })
+              }
+              required
+              fullWidth
+              helperText="Contact's email address"
+            />
+            <TextField
+              label="Contact Properties (JSON)"
+              multiline
+              rows={3}
+              value={eventForm.contact_properties}
+              onChange={(e) =>
+                setEventForm({
+                  ...eventForm,
+                  contact_properties: e.target.value
+                })
+              }
+              fullWidth
+              placeholder='{"AGE": 32, "GENDER": "FEMALE"}'
+              helperText="Optional: Contact attributes in JSON format"
+            />
+            <TextField
+              label="Event Properties (JSON)"
+              multiline
+              rows={4}
+              value={eventForm.event_properties}
+              onChange={(e) =>
+                setEventForm({ ...eventForm, event_properties: e.target.value })
+              }
+              fullWidth
+              placeholder='{"video_title": "Brevo Tutorial", "duration": 142, "autoplayed": false}'
+              helperText="Optional: Event-specific data in JSON format"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEventDialog(false)}>Cancel</Button>
+          <Button
+            onClick={handleEventSubmit}
+            variant="contained"
+            startIcon={<Event />}
+          >
+            Send Event
           </Button>
         </DialogActions>
       </Dialog>
