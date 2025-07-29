@@ -20,11 +20,11 @@ app.config['MAX_CONTENT_LENGTH'] = config.max_content_length
 
 # Initialize rate limiter
 limiter = Limiter(
-    app,
     key_func=get_remote_address,
     default_limits=[config.rate_limit_default],
     storage_uri="memory://"
 )
+limiter.init_app(app)
 
 # Configure logging
 logging.basicConfig(

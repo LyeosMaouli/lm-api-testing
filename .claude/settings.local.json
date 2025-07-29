@@ -3,7 +3,12 @@
     "allow": [
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(python:*)",
+      "Bash(venvScripts:*)",
+      "Bash(pip install:*)",
+      "Bash(.venvScriptsactivate)"
     ],
     "deny": []
   }
